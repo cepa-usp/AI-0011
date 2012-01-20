@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lom
+                xmlns="http://ltsc.ieee.org/xsd/LOMv1p0">
+	
+<general><identifier><catalog>AI-0011</catalog><entry>http://midia.atp.usp.br/atividades-interativas/AI-0011</entry></identifier><identifier><catalog>AI-0011_SCO</catalog><entry>http://midia.atp.usp.br/atividades-interativas/AI-0011_SCO.zip</entry></identifier><title><string
+                language="pt_BR">Coordenadas retangulares como a interseção de três superfícies</string></title><description><string
+                language="pt_BR">Esta atividade interativa expõe o conceito de coordenadas retangulares em três dimensões como a interseção entre entre três superfícies planas.</string></description><keyword><string language="">physics</string></keyword></general></lom>
