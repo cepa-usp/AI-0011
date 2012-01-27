@@ -10,12 +10,14 @@ package
 	import flash.events.FocusEvent;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	import flash.ui.Keyboard;
+	import flash.utils.Timer;
 	import org.papervision3d.core.geom.Lines3D;
 	import org.papervision3d.core.geom.renderables.Line3D;
 	import org.papervision3d.core.geom.renderables.Vertex3D;
@@ -121,7 +123,7 @@ package
 			
 			lookAtP();
 			
-			balao = new CaixaTexto();
+			balao = new CaixaTexto(true);
 			addChild(balao);
 			balao.visible = false;
 		}
@@ -238,16 +240,21 @@ package
 				case "xis":
 					if (xis.text == "") {
 						if (ypsolon.text == "" && ze.text == "") { //todos nulos
+							balao.removeNext();
 							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
 						}else if (ypsolon.text == "") {//x e y nulos
+							
+							balao.setNextTexts(["teste1", "teste2", "teste3"]);
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
 						}else if (ze.text == "") {//x e z nulos
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
+							balao.removeNext();
 						}else {//x nulo
 							balao.setText("Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.");
 						}
-						balao.x = xis.x + xis.width + 20;
-						balao.y = xis.y;					
+						//balao.x = xis.x + xis.width + 20;
+						//balao.y = xis.y;
+						balao.setPosition(xis.x + 40, xis.y);
 					}else {
 						balao.visible = false;
 					}
@@ -263,8 +270,7 @@ package
 						}else {//y nulo
 							balao.setText("Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.");
 						}
-						balao.x = ypsolon.x + ypsolon.width + 20;
-						balao.y = ypsolon.y;					
+						balao.setPosition(ypsolon.x + 40, ypsolon.y);					
 					}else {
 						balao.visible = false;
 					}
@@ -280,8 +286,7 @@ package
 						}else {//z nulo
 							balao.setText("Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.");
 						}
-						balao.x = ze.x + ze.width + 20;
-						balao.y = ze.y;					
+						balao.setPosition(ze.x + 40, ze.y);	
 					}else {
 						balao.visible = false;
 					}
