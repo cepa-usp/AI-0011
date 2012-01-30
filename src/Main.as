@@ -240,17 +240,17 @@ package
 				case "xis":
 					if (xis.text == "") {
 						if (ypsolon.text == "" && ze.text == "") { //todos nulos
-							balao.removeNext();
+							//balao.removeNext();
 							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
 						}else if (ypsolon.text == "") {//x e y nulos
 							
-							balao.setNextTexts(["teste1", "teste2", "teste3"]);
+							//balao.setNextTexts(["teste1", "teste2", "teste3"]);
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
 						}else if (ze.text == "") {//x e z nulos
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
-							balao.removeNext();
+							//balao.removeNext();
 						}else {//x nulo
-							balao.setText("Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.");
+							balao.setText(["Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando", "testando 2"]);
 						}
 						//balao.x = xis.x + xis.width + 20;
 						//balao.y = xis.y;
@@ -566,7 +566,8 @@ package
 		public var phi2:Number = 10.4537;
 		private function initRotation(e:MouseEvent):void 
 		{
-			if (e.target is TextField || e.target is CaixaTexto) return;
+			if (e.currentTarget is CaixaTexto || e.target is TextField) return;
+			
 			//{
 				clickPoint.x = stage.mouseX;
 				clickPoint.y = stage.mouseY;

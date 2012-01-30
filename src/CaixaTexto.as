@@ -1,6 +1,7 @@
 package 
 {
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
@@ -59,47 +60,68 @@ package
 			texto.selectable = false;
 			texto.x = marginText;
 			texto.y = marginText;
+			texto.mouseEnabled = false;
+			//texto.border = true;
 			addChild(texto);
 			
 			nextButton = new NextButton();
 			addChild(nextButton);
 			minWidth = nextButton.width + nextButtonBorder;
 			
-			this.addEventListener(MouseEvent.CLICK, clickHandler);
+			if (stage) stage.addEventListener(MouseEvent.CLICK, clickHandler);
+			else addEventListener(Event.ADDED_TO_STAGE, addListener);
 		}
 		
-		public function setNextTexts(textArray:Array):void
+		private function addListener(e:Event):void 
 		{
-			this.textArray = textArray;
-			hasNext = true;
-		}
-		
-		public function removeNext():void
-		{
-			hasNext = false;
-			drawBackground(texto.textWidth, texto.textHeight);
-			posicionaNextButton();
+			removeEventListener(Event.ADDED_TO_STAGE, addListener);
+			stage.addEventListener(MouseEvent.CLICK, clickHandler);
 		}
 		
 		private function clickHandler(e:MouseEvent):void 
 		{
+			trace(e.target);
 			if (e.target is NextButton) {
 				if (textArray.length >= 1) {
-					setText(textArray.splice(0, 1), currentWidth, sideForArrow, alignForArrow);
+					setText(textArray, sideForArrow, alignForArrow, currentWidth);
 				}else {
 					this.visible = false;
 				}
+			}else if (e.target != background) {
+				this.visible = false;
 			}
-			else this.visible = false;
 		}
 		
-		public function setText(text:String, width:Number = 200, side:String = LEFT, align:String = FIRST):void
+		public function setText(text:*, side:String = null, align:String = null, width:Number = 200):void
 		{
 			texto.width = width;
-			texto.text = text;
+			
+			if (text is String) {
+				texto.text = text;
+				hasNext = false;
+			}else if (text is Array) {
+				if (text.length > 1) {
+					texto.text = text[0];
+					this.textArray = text;
+					this.textArray.splice(0, 1);
+					hasNext = true;
+				}else if (text.length == 1) {
+					texto.text = text[0];
+					this.textArray = text;
+					this.textArray.splice(0, 1);
+					hasNext = false;
+				}else {
+					this.visible = false;
+					return;
+				}
+			}else {
+				this.visible = false;
+				return;
+			}
+			
 			currentWidth = width;
-			//sideForArrow = side;
-			//alignForArrow = align;
+			if(side != null) sideForArrow = side;
+			if(align != null) alignForArrow = align;
 			drawBackground(texto.textWidth, texto.textHeight);
 			posicionaNextButton();
 			setPosition(actualPosition.x, actualPosition.y);
@@ -119,7 +141,7 @@ package
 			
 			if (roundCorner) nextButton.x = marginText + textWidth - nextButton.width / 2;
 			else nextButton.x = 2 * marginText + textWidth - nextButton.width / 2 - nextButtonBorder;
-			nextButton.y = 2 * marginText + texto.textHeight + nextButton.height/2 + nextButtonBorder; 
+			nextButton.y = 2 * marginText + texto.textHeight + nextButton.height / 2 + nextButtonBorder;
 		}
 		
 		public function setPosition(x:Number, y:Number):void
@@ -133,9 +155,9 @@ package
 					if (alignForArrow == FIRST) {
 						this.y = y - marginText - widthArrow / 2;
 					}else if (alignForArrow == CENTER) {
-						this.y = y - marginText - texto.textHeight / 2;
+						this.y = y - background.height / 2;
 					}else {
-						this.y = y - marginText - texto.textHeight + widthArrow / 2;
+						this.y = y - background.height + marginText + widthArrow / 2;
 					}
 					break;
 				case TOP:
@@ -153,13 +175,13 @@ package
 					if (alignForArrow == FIRST) {
 						this.y = y - marginText - widthArrow / 2;
 					}else if (alignForArrow == CENTER) {
-						this.y = y - marginText - texto.textHeight / 2;
+						this.y = y - background.height / 2;
 					}else {
-						this.y = y - marginText - texto.textHeight + widthArrow / 2;
+						this.y = y - background.height + marginText + widthArrow / 2;
 					}
 					break;
 				case BOTTON:
-					this.y = y - distanceToObject - (2 * marginText) - heightArrow - texto.textHeight;
+					this.y = y - background.height - distanceToObject;
 					if (alignForArrow == FIRST) {
 						this.x = x - marginText - widthArrow / 2;
 					}else if (alignForArrow == CENTER) {
@@ -183,7 +205,10 @@ package
 				else h = h + nextButton.height + 2 * nextButtonBorder;
 			}
 			
-			if (w < minWidth) w = minWidth;
+			if (w < minWidth) {
+				w = minWidth;
+				texto.width = minWidth;
+			}
 			
 			if (sideForArrow != TOP) background.graphics.lineTo(marginText + w, 0);
 			else {
