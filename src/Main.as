@@ -123,7 +123,7 @@ package
 			
 			lookAtP();
 			
-			balao = new CaixaTexto(true);
+			balao = new CaixaTexto();
 			addChild(balao);
 			balao.visible = false;
 		}
@@ -250,7 +250,7 @@ package
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
 							//balao.removeNext();
 						}else {//x nulo
-							balao.setText(["Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando", "testando 2"]);
+							balao.setText(["Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta. Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando 2"], null, null, 50);
 						}
 						//balao.x = xis.x + xis.width + 20;
 						//balao.y = xis.y;

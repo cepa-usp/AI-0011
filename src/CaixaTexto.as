@@ -66,7 +66,8 @@ package
 			
 			nextButton = new NextButton();
 			addChild(nextButton);
-			minWidth = nextButton.width + nextButtonBorder;
+			if (roundCorner) minWidth = nextButton.width + nextButtonBorder;
+			else minWidth = nextButton.width - 2 * marginText + 2 * nextButtonBorder;
 			
 			if (stage) stage.addEventListener(MouseEvent.CLICK, clickHandler);
 			else addEventListener(Event.ADDED_TO_STAGE, addListener);
@@ -94,7 +95,8 @@ package
 		
 		public function setText(text:*, side:String = null, align:String = null, width:Number = 200):void
 		{
-			texto.width = width;
+			if (width >= minWidth) texto.width = width;
+			else texto.width = minWidth;
 			
 			if (text is String) {
 				texto.text = text;
