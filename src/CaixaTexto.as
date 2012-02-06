@@ -26,7 +26,7 @@ package
 		private var texto:TextField;
 		private var background:Sprite;
 		
-		private var marginText:Number = 15;
+		private var marginText:Number = 10;
 		private var _roundCorner:Boolean;
 		private var widthArrow:Number = 10; //Base da flecha
 		private var heightArrow:Number = 15; //comprimento da flecha
@@ -50,7 +50,7 @@ package
 			this.roundCorner = roundCorner;
 			background = new Sprite();
 			addChild(background);
-			background.filters = [new GlowFilter(0x000000, 0.5, 6, 6)];
+			background.filters = [new GlowFilter(0x000000, 0.5, 6, 6, 2, 2)];
 			
 			texto = new TextField();
 			texto.defaultTextFormat = new TextFormat("arial", 12, 0x000000);
@@ -198,8 +198,8 @@ package
 		private function drawBackground(w:Number, h:Number):void
 		{
 			background.graphics.clear();
-			background.graphics.lineStyle(1, 0x000000);
-			background.graphics.beginFill(0x00FFFF, 0.8);
+			background.graphics.lineStyle(1, 0xCA9C00);
+			background.graphics.beginFill(0xffd647, 1);
 			background.graphics.moveTo(marginText, 0);
 			
 			if (hasNext) {

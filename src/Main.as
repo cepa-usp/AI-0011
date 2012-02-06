@@ -69,6 +69,9 @@ package
 		private var upVector:Number3D = new Number3D(0, 0, 1);
 		
 		private var balao:CaixaTexto;
+		private var xis:TextField;
+		private var ypsolon:TextField;
+		private var ze:TextField;
 		
 		public function Main() 
 		{
@@ -90,32 +93,33 @@ package
 			
 			camera.target = null;
 			
+			xis = coordenadas.xis;
+			ypsolon = coordenadas.ypsolon;
+			ze= coordenadas.ze;
+			
 			rotating(null);
 			
-			info.addEventListener(MouseEvent.CLICK, showInfo);
-			instructions.addEventListener(MouseEvent.CLICK, showCC);
-			btnInst.addEventListener(MouseEvent.CLICK, openInst);
+			botoes.info.addEventListener(MouseEvent.CLICK, showInfo);
+			botoes.instructions.addEventListener(MouseEvent.CLICK, showCC);
+			botoes.btnInst.addEventListener(MouseEvent.CLICK, openInst);
 			
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, initRotation);
-			resetButton.addEventListener(MouseEvent.CLICK, resetCamera);
+			botoes.resetButton.addEventListener(MouseEvent.CLICK, resetCamera);
 			
 			stage.addEventListener(MouseEvent.MOUSE_WHEEL, viewZoom);
-			zoomIn.addEventListener(MouseEvent.CLICK, viewZoom);
-			zoomOut.addEventListener(MouseEvent.CLICK, viewZoom);
-			setChildIndex(zoomIn, numChildren - 1);
-			setChildIndex(zoomOut, numChildren - 1);
+			zoomBtns.zoomIn.addEventListener(MouseEvent.CLICK, viewZoom);
+			zoomBtns.zoomOut.addEventListener(MouseEvent.CLICK, viewZoom);
+			setChildIndex(zoomBtns, numChildren - 1);
 			
-			var infoTT:ToolTip = new ToolTip(info, "Informações", 12, 0.8, 100, 0.6, 0.6);
-			var instTT:ToolTip = new ToolTip(instructions, "Instruções", 12, 0.8, 100, 0.6, 0.6);
-			var resetTT:ToolTip = new ToolTip(resetButton, "Reiniciar", 12, 0.8, 100, 0.6, 0.6);
+			var infoTT:ToolTip = new ToolTip(botoes.info, "Informações", 12, 0.8, 100, 0.6, 0.6);
+			var instTT:ToolTip = new ToolTip(botoes.instructions, "Instruções", 12, 0.8, 100, 0.6, 0.6);
+			var resetTT:ToolTip = new ToolTip(botoes.resetButton, "Reiniciar", 12, 0.8, 100, 0.6, 0.6);
 			
 			addChild(infoTT);
 			addChild(instTT);
 			addChild(resetTT);
 			
-			setChildIndex(xis, numChildren - 1);
-			setChildIndex(ypsolon, numChildren - 1);
-			setChildIndex(ze, numChildren - 1);
+			setChildIndex(coordenadas, numChildren - 1);
 			
 			adicionaListenerCampos();
 			
@@ -123,7 +127,7 @@ package
 			
 			lookAtP();
 			
-			balao = new CaixaTexto();
+			balao = new CaixaTexto(true);
 			addChild(balao);
 			balao.visible = false;
 		}
@@ -170,9 +174,9 @@ package
 		
 		private function initCampos():void
 		{
-			xis.text = "25";
-			ypsolon.text = "25";
-			ze.text = "25";
+			coordenadas.xis.text = "25";
+			coordenadas.ypsolon.text = "25";
+			coordenadas.ze.text = "25";
 			
 			drawPlane("x", 25);
 			drawPlane("y", 25);
@@ -250,11 +254,11 @@ package
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
 							//balao.removeNext();
 						}else {//x nulo
-							balao.setText(["Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta. Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando 2"], null, null, 50);
+							balao.setText(["Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta. Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando 2"]);
 						}
 						//balao.x = xis.x + xis.width + 20;
 						//balao.y = xis.y;
-						balao.setPosition(xis.x + 40, xis.y);
+						balao.setPosition(xis.x + 40, xis.y + xis.height/2);
 					}else {
 						balao.visible = false;
 					}
