@@ -1,6 +1,8 @@
 package 
 {
+	import flash.display.SimpleButton;
 	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
@@ -69,32 +71,39 @@ package
 			if (roundCorner) minWidth = nextButton.width + nextButtonBorder;
 			else minWidth = nextButton.width - 2 * marginText + 2 * nextButtonBorder;
 			
-			if (stage) stage.addEventListener(MouseEvent.CLICK, clickHandler);
-			else addEventListener(Event.ADDED_TO_STAGE, addListener);
+			/*if (stage) stage.addEventListener(MouseEvent.CLICK, clickHandler);
+			else*/ addEventListener(Event.ADDED_TO_STAGE, addListener);
 		}
 		
 		private function addListener(e:Event):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, addListener);
-			stage.addEventListener(MouseEvent.CLICK, clickHandler);
+			stage.addEventListener(MouseEvent.MOUSE_DOWN, clickHandler);
 		}
 		
 		private function clickHandler(e:MouseEvent):void 
 		{
-			trace(e.target);
+			//trace("clicou em: " + e.target);
 			if (e.target is NextButton) {
 				if (textArray.length >= 1) {
 					setText(textArray, sideForArrow, alignForArrow, currentWidth);
-				}else {
-					this.visible = false;
 				}
-			}else if (e.target != background) {
-				this.visible = false;
+			}else if (e.target != background && !(e.target is SimpleButton)) {
+				if (this.visible) {
+					this.visible = false;
+					//trace("evento disparado");
+					dispatchEvent(new Event(Event.CLOSE));
+					
+				}
+				else this.visible = false;
 			}
 		}
 		
 		public function setText(text:*, side:String = null, align:String = null, width:Number = 200):void
 		{
+			this.textArray = null;
+			texto.text = "";
+			
 			if (width >= minWidth) texto.width = width;
 			else texto.width = minWidth;
 			
@@ -102,14 +111,20 @@ package
 				texto.text = text;
 				hasNext = false;
 			}else if (text is Array) {
-				if (text.length > 1) {
-					texto.text = text[0];
-					this.textArray = text;
+				var arrayCopy:Array = [];
+				for (var i:int = 0; i < text.length; i++) 
+				{
+					arrayCopy[i] = text[i];
+					
+				}
+				if (arrayCopy.length > 1) {
+					texto.text = arrayCopy[0];
+					this.textArray = arrayCopy;
 					this.textArray.splice(0, 1);
 					hasNext = true;
-				}else if (text.length == 1) {
-					texto.text = text[0];
-					this.textArray = text;
+				}else if (arrayCopy.length == 1) {
+					texto.text = arrayCopy[0];
+					this.textArray = arrayCopy;
 					this.textArray.splice(0, 1);
 					hasNext = false;
 				}else {

@@ -68,14 +68,25 @@ package
 		public var distance:Number = 100; 
 		private var upVector:Number3D = new Number3D(0, 0, 1);
 		
-		private var balao:CaixaTexto;
 		private var xis:TextField;
 		private var ypsolon:TextField;
 		private var ze:TextField;
 		
+		private var balao:CaixaTexto;
+		private var tutoSequence:Array = ["Especifique as coordenadas do ponto P nestas caixas de texto (pressione enter para confirmar ou esc para cancelar).", 
+										  "Quando as três coordenadas são dadas, obtemos o ponto P definido pela interseção das superfícies (planos, no caso) associadas a cada coordenada.",
+										  "Clique e arraste o mouse sobre a ilustração para modificar o ângulo de visão.",
+										  "Use os botões de zoom para ampliar ou reduzir."];
+		
+		private var pointsTuto:Array;
+		private var tutoBaloonPos:Array;
+		private var tutoPos:int;
+		private var tutoPhase:Boolean;
+		private var pontoP:Point = new Point();
+		
 		public function Main() 
 		{
-			super(650, 500, false, true);
+			super(650, 500, false, false);
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 			
@@ -109,17 +120,23 @@ package
 			stage.addEventListener(MouseEvent.MOUSE_WHEEL, viewZoom);
 			zoomBtns.zoomIn.addEventListener(MouseEvent.CLICK, viewZoom);
 			zoomBtns.zoomOut.addEventListener(MouseEvent.CLICK, viewZoom);
-			setChildIndex(zoomBtns, numChildren - 1);
+			zoomBtns.zoomIn.mouseChildren = false;
+			zoomBtns.zoomOut.mouseChildren = false;
+			zoomBtns.zoomIn.addEventListener(MouseEvent.MOUSE_OVER, over);
+			zoomBtns.zoomOut.addEventListener(MouseEvent.MOUSE_OVER, over);
 			
 			var infoTT:ToolTip = new ToolTip(botoes.info, "Informações", 12, 0.8, 100, 0.6, 0.6);
 			var instTT:ToolTip = new ToolTip(botoes.instructions, "Instruções", 12, 0.8, 100, 0.6, 0.6);
 			var resetTT:ToolTip = new ToolTip(botoes.resetButton, "Reiniciar", 12, 0.8, 100, 0.6, 0.6);
+			var intTT:ToolTip = new ToolTip(botoes.btnInst, "Reiniciar tutorial", 12, 0.8, 100, 0.6, 0.6);
 			
 			addChild(infoTT);
 			addChild(instTT);
 			addChild(resetTT);
+			addChild(intTT);
 			
 			setChildIndex(coordenadas, numChildren - 1);
+			setChildIndex(zoomBtns, numChildren - 1);
 			
 			adicionaListenerCampos();
 			
@@ -127,15 +144,82 @@ package
 			
 			lookAtP();
 			
-			balao = new CaixaTexto(true);
-			addChild(balao);
-			balao.visible = false;
+			iniciaTutorial();
+		}
+		
+		private function over(e:MouseEvent):void 
+		{
+			var btn:MovieClip = MovieClip(e.target);
+			btn.addEventListener(MouseEvent.MOUSE_OUT, out);
+			btn.gotoAndStop(2);
+		}
+		
+		private function out(e:MouseEvent):void 
+		{
+			var btn:MovieClip = MovieClip(e.target);
+			btn.removeEventListener(MouseEvent.MOUSE_OUT, out);
+			btn.gotoAndStop(1);
+		}
+		
+		private function iniciaTutorial():void 
+		{
+			tutoPos = 0;
+			tutoPhase = true;
+			getPCoord();
+			
+			if(balao == null){
+				balao = new CaixaTexto(true);
+				addChild(balao);
+				balao.visible = false;
+				
+				pointsTuto = 	[new Point(coordenadas.x + coordenadas.width, coordenadas.y + coordenadas.height/2),
+								//new Point(coordenadas.x + coordenadas.ypsolon.x + coordenadas.ypsolon.width, coordenadas.y + coordenadas.ypsolon.y + coordenadas.ypsolon.height/2),
+								pontoP,
+								new Point(650/2, 500/2),
+								new Point(zoomBtns.x + zoomBtns.width, zoomBtns.y + zoomBtns.height / 2)];
+								
+				tutoBaloonPos = [[CaixaTexto.LEFT, CaixaTexto.FIRST],
+								[CaixaTexto.LEFT, CaixaTexto.FIRST],
+								[CaixaTexto.TOP, CaixaTexto.CENTER],
+								[CaixaTexto.LEFT, CaixaTexto.FIRST]];
+			}
+			balao.removeEventListener(Event.CLOSE, closeBalao);
+			
+			balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+			balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			balao.addEventListener(Event.CLOSE, closeBalao);
+			balao.visible = true;
+		}
+		
+		private function getPCoord():void
+		{
+			var bounds:Rectangle = viewport.getChildLayer(containerP).getBounds(stage);
+			pontoP.x = bounds.x;
+			pontoP.y = bounds.y;
+			//trace(bounds);
+		}
+		
+		private function closeBalao(e:Event):void 
+		{
+			//trace("entrou");
+			tutoPos++;
+			//trace(tutoPos);
+			getPCoord();
+			if (tutoPos >= tutoSequence.length) {
+				balao.removeEventListener(Event.CLOSE, closeBalao);
+				balao.visible = false;
+				tutoPhase = false;
+			}else {
+				balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+				balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			}
 		}
 		
 		private function openInst(e:MouseEvent):void 
 		{
-			instScreen.openScreen();
-			setChildIndex(instScreen, numChildren - 1);
+			//instScreen.openScreen();
+			//setChildIndex(instScreen, numChildren - 1);
+			iniciaTutorial();
 		}
 		
 		private function showInfo(e:MouseEvent):void 
@@ -163,7 +247,8 @@ package
 					if (zoom > 40) zoom -=  5;
 				}
 			}else {
-				if (e.target is ZoomIn) {
+				trace(e.target.name);
+				if (e.target.name == "zoomIn") {
 					if(zoom < 120) zoom +=  5;
 				}else {
 					if (zoom > 40) zoom -=  5;
@@ -244,23 +329,17 @@ package
 				case "xis":
 					if (xis.text == "") {
 						if (ypsolon.text == "" && ze.text == "") { //todos nulos
-							//balao.removeNext();
 							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
 						}else if (ypsolon.text == "") {//x e y nulos
-							
-							//balao.setNextTexts(["teste1", "teste2", "teste3"]);
-							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
+							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.");
 						}else if (ze.text == "") {//x e z nulos
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
-							//balao.removeNext();
 						}else {//x nulo
-							balao.setText(["Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta. Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.", "testando 2"]);
+							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.");
 						}
-						//balao.x = xis.x + xis.width + 20;
-						//balao.y = xis.y;
 						balao.setPosition(xis.x + 40, xis.y + xis.height/2);
 					}else {
-						balao.visible = false;
+						if(!tutoPhase) balao.visible = false;
 					}
 					break;
 				case "ypsolon":
@@ -268,15 +347,15 @@ package
 						if (xis.text == "" && ze.text == "") { //todos nulos
 							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
 						}else if (xis.text == "") {//x e y nulos
-							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
+							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.");
 						}else if (ze.text == "") {//y e z nulos
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
 						}else {//y nulo
-							balao.setText("Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.");
+							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.");
 						}
-						balao.setPosition(ypsolon.x + 40, ypsolon.y);					
+						balao.setPosition(ypsolon.x + 40, ypsolon.y + ypsolon.height/2);
 					}else {
-						balao.visible = false;
+						if(!tutoPhase) balao.visible = false;
 					}
 					break;
 				case "ze":
@@ -284,15 +363,15 @@ package
 						if (ypsolon.text == "" && xis.text == "") { //todos nulos
 							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
 						}else if (ypsolon.text == "") {//z e y nulos
-							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
+							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.");
 						}else if (xis.text == "") {//x e z nulos
 							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
 						}else {//z nulo
-							balao.setText("Com esse parâmetro nulo existem apenas 2 planos, sendo que a interseção entre eles forma uma reta.");
+							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.");
 						}
-						balao.setPosition(ze.x + 40, ze.y);	
+						balao.setPosition(ze.x + 40, ze.y + ze.height/2);
 					}else {
-						balao.visible = false;
+						if(!tutoPhase) balao.visible = false;
 					}
 					break;
 				
