@@ -113,22 +113,26 @@ package
 			botoes.info.addEventListener(MouseEvent.CLICK, showInfo);
 			botoes.instructions.addEventListener(MouseEvent.CLICK, showCC);
 			botoes.btnInst.addEventListener(MouseEvent.CLICK, openInst);
+			botoes.resetButton.addEventListener(MouseEvent.CLICK, resetCamera);
 			
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, initRotation);
-			botoes.resetButton.addEventListener(MouseEvent.CLICK, resetCamera);
+			stage.addEventListener(KeyboardEvent.KEY_UP, keyUp);
+			
 			
 			stage.addEventListener(MouseEvent.MOUSE_WHEEL, viewZoom);
 			zoomBtns.zoomIn.addEventListener(MouseEvent.CLICK, viewZoom);
 			zoomBtns.zoomOut.addEventListener(MouseEvent.CLICK, viewZoom);
 			zoomBtns.zoomIn.mouseChildren = false;
 			zoomBtns.zoomOut.mouseChildren = false;
+			zoomBtns.zoomIn.buttonMode = true;
+			zoomBtns.zoomOut.buttonMode = true;
 			zoomBtns.zoomIn.addEventListener(MouseEvent.MOUSE_OVER, over);
 			zoomBtns.zoomOut.addEventListener(MouseEvent.MOUSE_OVER, over);
 			
-			var infoTT:ToolTip = new ToolTip(botoes.info, "Informações", 12, 0.8, 100, 0.6, 0.6);
-			var instTT:ToolTip = new ToolTip(botoes.instructions, "Instruções", 12, 0.8, 100, 0.6, 0.6);
-			var resetTT:ToolTip = new ToolTip(botoes.resetButton, "Reiniciar", 12, 0.8, 100, 0.6, 0.6);
-			var intTT:ToolTip = new ToolTip(botoes.btnInst, "Reiniciar tutorial", 12, 0.8, 100, 0.6, 0.6);
+			var infoTT:ToolTip = new ToolTip(botoes.info, "Informações", 12, 0.8, 100, 0.6, 0.1);
+			var instTT:ToolTip = new ToolTip(botoes.instructions, "Instruções", 12, 0.8, 100, 0.6, 0.1);
+			var resetTT:ToolTip = new ToolTip(botoes.resetButton, "Reiniciar", 12, 0.8, 100, 0.6, 0.1);
+			var intTT:ToolTip = new ToolTip(botoes.btnInst, "Reiniciar tutorial", 12, 0.8, 100, 0.6, 0.1);
 			
 			addChild(infoTT);
 			addChild(instTT);
@@ -137,6 +141,7 @@ package
 			
 			setChildIndex(coordenadas, numChildren - 1);
 			setChildIndex(zoomBtns, numChildren - 1);
+			setChildIndex(botoes, numChildren - 1);
 			
 			adicionaListenerCampos();
 			
@@ -145,6 +150,22 @@ package
 			lookAtP();
 			
 			iniciaTutorial();
+		}
+		
+		private function keyUp(e:KeyboardEvent):void 
+		{
+			if(e.charCode == Keyboard.ESCAPE){
+				if (stage.focus == xis) {
+					xis.text = String(planeX.x);
+					stage.focus = null;
+				}else if (stage.focus == ypsolon) {
+					ypsolon.text = String(planeY.y);
+					stage.focus = null;
+				}else if (stage.focus == ze) {
+					ze.text = String(Math.abs(planeZ.z));
+					stage.focus = null;
+				}
+			}
 		}
 		
 		private function over(e:MouseEvent):void 
@@ -173,7 +194,6 @@ package
 				balao.visible = false;
 				
 				pointsTuto = 	[new Point(coordenadas.x + coordenadas.width, coordenadas.y + coordenadas.height/2),
-								//new Point(coordenadas.x + coordenadas.ypsolon.x + coordenadas.ypsolon.width, coordenadas.y + coordenadas.ypsolon.y + coordenadas.ypsolon.height/2),
 								pontoP,
 								new Point(650/2, 500/2),
 								new Point(zoomBtns.x + zoomBtns.width, zoomBtns.y + zoomBtns.height / 2)];
@@ -193,10 +213,12 @@ package
 		
 		private function getPCoord():void
 		{
-			var bounds:Rectangle = viewport.getChildLayer(containerP).getBounds(stage);
-			pontoP.x = bounds.x;
-			pontoP.y = bounds.y;
-			//trace(bounds);
+			if(containerP != null){
+				var bounds:Rectangle = viewport.getChildLayer(containerP).getBounds(stage);
+				pontoP.x = bounds.x;
+				pontoP.y = bounds.y + bounds.height / 2;
+				//trace(bounds);
+			}
 		}
 		
 		private function closeBalao(e:Event):void 
@@ -204,14 +226,29 @@ package
 			//trace("entrou");
 			tutoPos++;
 			//trace(tutoPos);
-			getPCoord();
 			if (tutoPos >= tutoSequence.length) {
 				balao.removeEventListener(Event.CLOSE, closeBalao);
 				balao.visible = false;
 				tutoPhase = false;
 			}else {
-				balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
-				balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+				if(tutoPos != 1){
+					balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+					balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+				}else {
+					if(containerP != null){
+						getPCoord();
+						if (pontoP.x > 650 / 2) tutoBaloonPos[1][0] = CaixaTexto.RIGHT;
+						else tutoBaloonPos[1][0] = CaixaTexto.LEFT;
+						
+						if (pontoP.y > 500 / 2) tutoBaloonPos[1][1] = CaixaTexto.LAST;
+						else tutoBaloonPos[1][1] = CaixaTexto.FIRST;
+						
+						balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+						balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+					}else {
+						closeBalao(null);
+					}
+				}
 			}
 		}
 		
@@ -284,12 +321,19 @@ package
 		
 		private function changeHandler(e:Event):void 
 		{
-			if(e is KeyboardEvent){
+			if (e is KeyboardEvent) {
 				if(KeyboardEvent(e).keyCode == Keyboard.ENTER){
 					changePlanes(e.target.name);
+					stage.focus = null;
 				}
 			}else {
-				changePlanes(e.target.name);
+				if (e.target == xis) {
+					if(planeX != null) xis.text = String(planeX.x);
+				}else if (e.target  == ypsolon) {
+					if(planeY != null) ypsolon.text = String(planeY.y);
+				}else if (e.target  == ze) {
+					if(planeZ != null) ze.text = String(Math.abs(planeZ.z));
+				}
 			}
 		}
 		
@@ -329,15 +373,15 @@ package
 				case "xis":
 					if (xis.text == "") {
 						if (ypsolon.text == "" && ze.text == "") { //todos nulos
-							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
+							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else if (ypsolon.text == "") {//x e y nulos
-							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.");
+							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else if (ze.text == "") {//x e z nulos
-							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
+							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else {//x nulo
-							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.");
+							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}
-						balao.setPosition(xis.x + 40, xis.y + xis.height/2);
+						balao.setPosition(coordenadas.x + xis.x + 40, coordenadas.y + xis.y + xis.height/2);
 					}else {
 						if(!tutoPhase) balao.visible = false;
 					}
@@ -345,15 +389,15 @@ package
 				case "ypsolon":
 					if (ypsolon.text == "") {
 						if (xis.text == "" && ze.text == "") { //todos nulos
-							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
+							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else if (xis.text == "") {//x e y nulos
-							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.");
+							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else if (ze.text == "") {//y e z nulos
-							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
+							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else {//y nulo
-							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.");
+							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}
-						balao.setPosition(ypsolon.x + 40, ypsolon.y + ypsolon.height/2);
+						balao.setPosition(coordenadas.x + ypsolon.x + 40, coordenadas.y + ypsolon.y + ypsolon.height/2);
 					}else {
 						if(!tutoPhase) balao.visible = false;
 					}
@@ -361,15 +405,15 @@ package
 				case "ze":
 					if (ze.text == "") {
 						if (ypsolon.text == "" && xis.text == "") { //todos nulos
-							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.");
+							balao.setText("Com todos os parâmetros nulos não existem planos nem interseções.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else if (ypsolon.text == "") {//z e y nulos
-							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.");
+							balao.setText("Quando apenas uma coordenada é dadas, temos a superfície (plano, no caso) associada a esta coordenada.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else if (xis.text == "") {//x e z nulos
-							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.");
+							balao.setText("Com dois parâmetros nulos existe apenas 1 plano sem interseções.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}else {//z nulo
-							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.");
+							balao.setText("Quando apenas duas coordenadas são dadas, obtemos a curva (reta, no caso) definida pela interseção das superfícies (planos, no caso) associadas a cada coordenada.", CaixaTexto.LEFT, CaixaTexto.FIRST);
 						}
-						balao.setPosition(ze.x + 40, ze.y + ze.height/2);
+						balao.setPosition(coordenadas.x + ze.x + 40, coordenadas.y + ze.y + ze.height/2);
 					}else {
 						if(!tutoPhase) balao.visible = false;
 					}
