@@ -118,7 +118,6 @@ package
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, initRotation);
 			stage.addEventListener(KeyboardEvent.KEY_UP, keyUp);
 			
-			
 			stage.addEventListener(MouseEvent.MOUSE_WHEEL, viewZoom);
 			zoomBtns.zoomIn.addEventListener(MouseEvent.CLICK, viewZoom);
 			zoomBtns.zoomOut.addEventListener(MouseEvent.CLICK, viewZoom);
@@ -156,13 +155,16 @@ package
 		{
 			if(e.charCode == Keyboard.ESCAPE){
 				if (stage.focus == xis) {
-					xis.text = String(planeX.x);
+					if (planeX != null) xis.text = String(planeX.x);
+					else xis.text = "";
 					stage.focus = null;
 				}else if (stage.focus == ypsolon) {
-					ypsolon.text = String(planeY.y);
+					if (planeY != null) ypsolon.text = String(planeY.y);
+					else ypsolon.text = "";
 					stage.focus = null;
 				}else if (stage.focus == ze) {
-					ze.text = String(Math.abs(planeZ.z));
+					if (planeZ != null) ze.text = String(Math.abs(planeZ.z));
+					else ze.text = "";
 					stage.focus = null;
 				}
 			}
@@ -328,11 +330,14 @@ package
 				}
 			}else {
 				if (e.target == xis) {
-					if(planeX != null) xis.text = String(planeX.x);
+					if (planeX != null) xis.text = String(planeX.x);
+					else xis.text = "";
 				}else if (e.target  == ypsolon) {
-					if(planeY != null) ypsolon.text = String(planeY.y);
+					if (planeY != null) ypsolon.text = String(planeY.y);
+					else ypsolon.text = "";
 				}else if (e.target  == ze) {
-					if(planeZ != null) ze.text = String(Math.abs(planeZ.z));
+					if (planeZ != null) ze.text = String(Math.abs(planeZ.z));
+					else ze.text = "";
 				}
 			}
 		}
@@ -754,6 +759,7 @@ package
 			
 			initCampos();
 			balao.visible = false;
+			tutoPhase = false;
 		}
 		
 	}
